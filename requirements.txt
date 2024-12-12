@@ -1,0 +1,7 @@
+clearml==1.16.5
+datasets==3.1.0
+huggingface_hub==0.26.5
+nanotron==0.4
+numpy==2.2.0
+torch==2.5.1
+transformers==4.46.1

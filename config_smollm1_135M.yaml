@@ -84,7 +84,7 @@ optimizer:
   weight_decay: 0.01
   zero_stage: 0
 parallelism:
-  dp: 2 # 4 nodes
+  dp: 1 # 4 nodes
   expert_parallel_size: 1
   pp: 1
   pp_engine: 1f1b
@@ -104,5 +104,5 @@ tokens:
   limit_val_batches: 0
   micro_batch_size: 4 # GBS = 8*2*32*sequence_length = 512*sequence_length = 1M tokens
   sequence_length: 2048
-  train_steps: 600000
+  train_steps: 100
   val_check_interval: -1

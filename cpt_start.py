@@ -1,29 +1,23 @@
 """
-Nanotron training script example using a custom dataloader.
+Nanotron training script.
 
 Usage:
 ```
 export CUDA_DEVICE_MAX_CONNECTIONS=1 # important for some distributed operations
-torchrun --nproc_per_node=2 cpt_start.py --config-file clearml/config_smollm1_135M.yaml
+torchrun --nproc_per_node=8 run_train.py --config-file examples/config_tiny_llama.yaml
 ```
 """
 from clearml import Task
-
 import argparse
 from typing import Dict, cast
 
-import datasets
 import numpy as np
 from nanotron import logging
-from nanotron.config import (
-    DataArgs,
-    DatasetStageArgs,
-    PretrainDatasetsArgs,
-)
+from nanotron.config import DataArgs, DatasetStageArgs, NanosetDatasetsArgs, PretrainDatasetsArgs
+from nanotron.data.dataloader_builder import build_nanoset_dataloader
 from nanotron.dataloader import (
-    DataCollatorForCLM,
     clm_process,
-    get_dataloader_worker_init,
+    dummy_infinite_data_generator,
     get_datasets,
     get_train_dataloader,
 )
@@ -67,40 +61,18 @@ def get_dataloader_from_data_stage(
     # First, we need to know which ranks to feed the dataloader to
     input_pp_rank, output_pp_rank = get_input_output_pp_ranks(model=trainer.model)
 
-    # Case 1: custom data generator
+    # Case 1: Dummy data generator
     if data.dataset is None:
-        log_rank("Using custom data generator", logger=logger, level=logging.INFO, rank=0)
-
-        ###########################################################################################################
-        # This can be replaced with your own tokenized data generator
-        ###########################################################################################################
-        train_dataset = datasets.Dataset.from_dict(
-            {
-                "input_ids": np.random.randint(
-                    0,
-                    trainer.config.model.model_config.vocab_size,
-                    (trainer.global_batch_size * num_remaining_train_steps, trainer.sequence_length + 1),
-                ),
-            }
-        )
-        ###########################################################################################################
-
-        data_collator = DataCollatorForCLM(
+        log_rank("Using dummy data generator", logger=logger, level=logging.INFO, rank=0)
+        dataloader = dummy_infinite_data_generator(
+            micro_batch_size=trainer.micro_batch_size,
             sequence_length=trainer.sequence_length,
             input_pp_rank=input_pp_rank,
             output_pp_rank=output_pp_rank,
+            vocab_size=trainer.model_config.vocab_size,
+            seed=data.seed,
             parallel_context=trainer.parallel_context,
-        )
-
-        return DataLoader(
-            train_dataset,
-            batch_size=trainer.micro_batch_size,
-            collate_fn=data_collator,
-            drop_last=True,
-            num_workers=0,
-            pin_memory=True,
-            worker_init_fn=get_dataloader_worker_init(dp_rank=trainer.parallel_context.dp_pg.rank()),
-        )
+        )()
 
     # Case 2: HuggingFace datasets
     elif isinstance(data.dataset, PretrainDatasetsArgs):
@@ -115,6 +87,9 @@ def get_dataloader_from_data_stage(
 
         # We need to the 1st device to process dataset and cache it, then other devices load from cache
         with main_rank_first(trainer.parallel_context.world_pg):
+            # TODO @nouamanetazi: this may timeout before 1st device finishes processing dataset. Can we have a ctxmanager to modify timeout?
+            # TODO: generalise to include  for validation/test splits
+
             # We load the raw dataset
             raw_dataset = get_datasets(
                 hf_dataset_or_datasets=data.dataset.hf_dataset_or_datasets,
@@ -125,6 +100,11 @@ def get_dataloader_from_data_stage(
             tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
             tokenizer.pad_token = tokenizer.eos_token
             tokenizer.padding_side = "left"
+
+            # Check that tokenizer's vocab size is smaller than the model's vocab size
+            assert (
+                tokenizer.vocab_size <= trainer.model_config.vocab_size
+            ), f"Tokenizer's vocab size ({tokenizer.vocab_size}) is larger than the model's vocab size ({trainer.model_config.vocab_size})"
 
             # We apply the Causal Language Modeling preprocessing
             train_dataset = clm_process(
@@ -159,6 +139,40 @@ def get_dataloader_from_data_stage(
                 f"Dataset is too small for steps ({total_tokens_dataset} < {num_tokens_needed_for_training}), "
                 f"Try train_steps<={len(dataloader.dataset) // trainer.global_batch_size + trainer.iteration_step}"
             )
+
+    # Case 3: Nanosets
+    elif isinstance(data.dataset, NanosetDatasetsArgs):
+        # Get tokenizer cardinality
+        tokenizer = AutoTokenizer.from_pretrained(trainer.config.tokenizer.tokenizer_name_or_path)
+        token_size = 4 if len(tokenizer) > np.iinfo(np.uint16).max + 1 else 2
+        del tokenizer
+        # Create Nanoset
+        from nanotron.data.nanoset import Nanoset
+
+        with main_rank_first(trainer.parallel_context.world_pg):
+            train_dataset = Nanoset(
+                dataset_folders=data.dataset.dataset_folder,
+                dataset_weights=data.dataset.dataset_weights,
+                sequence_length=trainer.sequence_length,
+                token_size=token_size,
+                train_split_num_samples=trainer.config.tokens.train_steps * trainer.global_batch_size,
+                random_seed=data.seed,
+            )
+
+        # Prepare dataloader
+        train_dataloader = build_nanoset_dataloader(
+            train_dataset,
+            trainer.sequence_length,
+            parallel_context=trainer.parallel_context,
+            input_pp_rank=input_pp_rank,
+            output_pp_rank=output_pp_rank,
+            micro_batch_size=trainer.micro_batch_size,
+            consumed_train_samples=consumed_train_samples,
+            dataloader_num_workers=data.num_loading_workers,
+            dataloader_drop_last=True,
+        )
+
+        return train_dataloader
     else:
         raise ValueError(f"Unhandled case of `self.config.data.dataset`. Got: {data.dataset}")
 
@@ -187,6 +201,8 @@ def get_dataloader(trainer: DistributedTrainer) -> Dict[str, DataLoader]:
             rank=0,
         )
 
+        print("++++++++", stage)
+
         dataloader = (
             get_dataloader_from_data_stage(
                 trainer,
@@ -213,9 +229,9 @@ def get_args():
 
 
 if __name__ == "__main__":
+    task = Task.init(project_name='arkts', task_name='cpt_smollm_135m')
     args = get_args()
     config_file = args.config_file
-    task = Task.init(project_name='arkTS project', task_name='CPT experiment')
 
     # Load trainer and data
     trainer = DistributedTrainer(config_file)

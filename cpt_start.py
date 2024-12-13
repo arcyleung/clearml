@@ -3,8 +3,7 @@ Nanotron training script.
 
 Usage:
 ```
-export CUDA_DEVICE_MAX_CONNECTIONS=1 # important for some distributed operations
-torchrun --nproc_per_node=8 run_train.py --config-file examples/config_tiny_llama.yaml
+CUDA_DEVICE_MAX_CONNECTIONS=1 torchrun --nproc_per_node=1 cpt_start.py --config-file config_smollm1_135M.yaml
 ```
 """
 from clearml import Task

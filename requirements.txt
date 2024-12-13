@@ -1,9 +1,0 @@
-clearml
-clearml-agent
-datasets
-huggingface_hub
-nanotron
-numba
-numpy
-torch
-transformers

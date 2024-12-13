@@ -1,6 +1,6 @@
 # SmolLM1 135M trained on 600B tokens
 checkpoints:
-  checkpoint_interval: 2000
+  checkpoint_interval: 100
   checkpoints_path: checkpoints
   checkpoints_path_is_shared_file_system: false
   resume_checkpoint_path: null
@@ -84,7 +84,7 @@ optimizer:
   weight_decay: 0.01
   zero_stage: 0
 parallelism:
-  dp: 1 # 4 nodes
+  dp: 4 # 4 cards
   expert_parallel_size: 1
   pp: 1
   pp_engine: 1f1b
@@ -99,7 +99,7 @@ tokenizer:
   tokenizer_name_or_path: HuggingFaceTB/SmolLM-135M
   tokenizer_revision: null
 tokens:
-  batch_accumulation_per_replica: 2
+  batch_accumulation_per_replica: 4
   limit_test_batches: 0
   limit_val_batches: 0
   micro_batch_size: 4 # GBS = 8*2*32*sequence_length = 512*sequence_length = 1M tokens

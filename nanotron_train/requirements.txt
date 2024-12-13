@@ -4,6 +4,8 @@ datasets
 huggingface_hub
 nanotron
 numba
-numpy
 torch
 transformers
+flash-attn>=2.5.0
+triton
+datatrove

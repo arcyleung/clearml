@@ -1,0 +1,16 @@
+### model
+model_name_or_path: /home/arthur/arkts/Qwen2.5-Coder-0.5B
+
+### method
+stage: pt
+do_train: true
+finetuning_type: lora
+lora_target: all
+
+### dataset
+dataset: arkts  # video: mllm_video_demo
+template: qwen2_vl
+cutoff_len: 2048
+max_samples: 1000
+overwrite_cache: true
+preprocessing_num_workers: 16

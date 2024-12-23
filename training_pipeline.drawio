@@ -1,0 +1,51 @@
+<mxfile host="65bd71144e">
+    <diagram name="Page-1" id="KscOucJOolFp8NFxgL6y">
+        <mxGraphModel dx="960" dy="422" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="PPONDHGBJ6GsKwcfjAT5-1" value="arkts-1466" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="280" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="PPONDHGBJ6GsKwcfjAT5-2" value="nanotron/ llamafactory" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="280" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="PPONDHGBJ6GsKwcfjAT5-3" value="Dataset" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="160" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="PPONDHGBJ6GsKwcfjAT5-4" value="Preprocessing" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="360" y="160" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="PPONDHGBJ6GsKwcfjAT5-5" value="Pretraining" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="160" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="PPONDHGBJ6GsKwcfjAT5-6" value="Posttraining" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="680" y="160" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="PPONDHGBJ6GsKwcfjAT5-7" value="Optimization" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="840" y="160" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="PPONDHGBJ6GsKwcfjAT5-8" value="arkts-multipl-t-syn" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="200" y="320" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="PPONDHGBJ6GsKwcfjAT5-9" value="TRL + unsloth" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="520" y="320" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="PPONDHGBJ6GsKwcfjAT5-12" value="nanotron/ llamafactory" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="680" y="280" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <UserObject label="https://sebastianraschka.com/blog/2024/new-llm-pre-training-and-post-training.html&#10;https://colab.research.google.com/drive/1Kose-ucXO1IBaZq5BvbwWieuubP7hxvQ?usp=sharing#scrollTo=yqxqAZ7KJ4oL&#10;https://github.com/modelscope/data-juicer/tree/main/tools/preprocess&#10;&#10;Eval:&#10;https://github.com/huggingface/lighteval (not sure how it can eval code competion)&#10;https://github.com/MCEVAL/McEval&#10;&#10;Dataset:&#10;https://huggingface.co/datasets/Multilingual-Multimodal-NLP/McEval/viewer/completion/test?q=Typescript&#10;&#10;" link="https://sebastianraschka.com/blog/2024/new-llm-pre-training-and-post-training.html" id="PPONDHGBJ6GsKwcfjAT5-13">
+                    <mxCell style="text;whiteSpace=wrap;fontSize=8;" parent="1" vertex="1">
+                        <mxGeometry x="200" y="50" width="470" height="100" as="geometry"/>
+                    </mxCell>
+                </UserObject>
+                <mxCell id="2" value="LotusTrace" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="280" y="380" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="3" value="Data Juicer" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
+                    <mxGeometry x="360" y="280" width="120" height="40" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
